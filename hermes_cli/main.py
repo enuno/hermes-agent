@@ -1543,6 +1543,7 @@ def select_provider_and_model(args=None):
         "arcee",
         "nvidia",
         "ollama-cloud",
+        "venice": "Venice AI",
     ):
         _model_flow_api_key_provider(config, selected_provider, current_model)
 
@@ -6229,9 +6230,8 @@ def cmd_dashboard(args):
         print(f"Install them with:  {sys.executable} -m pip install 'fastapi' 'uvicorn[standard]'")
         sys.exit(1)
 
-    if "HERMES_WEB_DIST" not in os.environ:
-        if not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
-            sys.exit(1)
+    if not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
+        sys.exit(1)
 
     from hermes_cli.web_server import start_server
 

@@ -307,6 +307,28 @@ _PROVIDER_MODELS: dict[str, list[str]] = {
         "glm-4.7",
         "MiniMax-M2.5",
     ],
+    "venice": [
+        "qwen3-5-397b-a17b",
+        "qwen3-coder-480b-a35b-instruct",
+        "qwen3-235b-a22b-thinking-2507",
+        "zai-org-glm-5",
+        "zai-org-glm-5-1",
+        "zai-org-glm-4.7",
+        "kimi-k2-5",
+        "kimi-k2-thinking",
+        "deepseek-v3.2",
+        "grok-41-fast",
+        "minimax-m27",
+        "minimax-m25",
+        "openai-gpt-54",
+        "openai-gpt-53-codex",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "venice-uncensored",
+        "e2ee-qwen3-5-122b-a10b",
+        "e2ee-glm-5",
+        "e2ee-glm-4-7-flash-p",
+    ],
     # Curated HF model list — only agentic models that map to OpenRouter defaults.
     "huggingface": [
         "moonshotai/Kimi-K2.5",
@@ -571,6 +593,7 @@ CANONICAL_PROVIDERS: list[ProviderEntry] = [
     ProviderEntry("opencode-go",    "OpenCode Go",              "OpenCode Go (open models, $10/month subscription)"),
     ProviderEntry("ai-gateway",     "Vercel AI Gateway",        "Vercel AI Gateway (200+ models, pay-per-use)"),
     ProviderEntry("bedrock",        "AWS Bedrock",              "AWS Bedrock (Claude, Nova, Llama, DeepSeek — IAM or API key)"),
+    ProviderEntry("venice-ai",      "Venice.ai",                "Venice AI with no data retention, permissionless access, and compute you permanently own"),
 ]
 
 # Derived dicts — used throughout the codebase
@@ -638,6 +661,7 @@ _PROVIDER_ALIASES = {
     "nemotron": "nvidia",
     "ollama": "custom",  # bare "ollama" = local; use "ollama-cloud" for cloud
     "ollama_cloud": "ollama-cloud",
+    "venice-ai": "venice",
 }
 
 
@@ -1320,6 +1344,16 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
         live = fetch_ollama_cloud_models(force_refresh=force_refresh)
         if live:
             return live
+    if normalized == "venice":
+        try:
+            from hermes_cli.auth import resolve_api_key_provider_credentials
+            creds = resolve_api_key_provider_credentials("venice")
+            if creds.get("api_key"):
+                live = fetch_api_models(creds["api_key"], creds["base_url"])
+                if live:
+                    return live
+        except Exception:
+            pass
     if normalized == "custom":
         base_url = _get_custom_base_url()
         if base_url:
